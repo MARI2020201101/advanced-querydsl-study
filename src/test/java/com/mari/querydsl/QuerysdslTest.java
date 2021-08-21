@@ -20,6 +20,7 @@ import java.util.List;
 import static com.mari.querydsl.entity.QMember.member;
 
 import static com.mari.querydsl.entity.QTeam.team;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
@@ -115,5 +116,19 @@ public class QuerysdslTest {
         result.stream().forEach(System.out::println);
         Assertions.assertEquals(result.get(0).getAge(),100);
 
+    }
+
+    @Test
+    void paging(){
+        QueryResults<Member> result = queryFactory.selectFrom(member)
+                .orderBy(member.id.desc())
+                .offset(1)
+                .limit(2)
+                .fetchResults();
+
+        assertThat(result.getTotal()).isEqualTo(4);
+        assertThat(result.getLimit()).isEqualTo(2);
+        assertThat(result.getOffset()).isEqualTo(1);
+        result.getResults().stream().forEach(System.out::println);
     }
 }
