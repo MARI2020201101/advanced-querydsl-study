@@ -148,4 +148,19 @@ public class QuerysdslTest {
         assertThat(tuple.get(member.age.min())).isEqualTo(20);
 
     }
+    @Test
+    void joinAndGroupBy(){
+        List<Tuple> result = queryFactory
+                .select(team.name, member.age.avg())
+                .from(member)
+                .join(member.team, team)
+                .groupBy(team.id)
+                .fetch();
+        result.stream().forEach(System.out::println);
+        Tuple tuple = result.get(0);
+        assertThat(tuple.get(member.age.avg())).isEqualTo(25);
+
+    }
+
+
 }
