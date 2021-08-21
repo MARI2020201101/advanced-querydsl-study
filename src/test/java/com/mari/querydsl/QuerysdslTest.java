@@ -324,4 +324,18 @@ public class QuerysdslTest {
                 .fetch();
         findMembers.forEach(System.out::println);
     }
+
+    @Test
+    void simple_case(){
+    List<String> result = queryFactory
+            .select(
+                member.age
+                        .when(20).then("스무살")
+                        .when(30).then("서른살")
+                        .otherwise("기타")
+            ).from(member)
+            .fetch();
+        result.forEach(r-> System.out.println("member : "+ r));
+
+    }
 }
