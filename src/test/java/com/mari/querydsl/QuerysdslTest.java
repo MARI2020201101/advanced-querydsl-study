@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.util.List;
 
 import static com.mari.querydsl.entity.QMember.member;
@@ -241,5 +242,31 @@ public class QuerysdslTest {
 
         result.stream().forEach(System.out::println);
         //assertThat(result.size()).isEqualTo(2);
+    }
+
+    @Autowired
+    private EntityManagerFactory emf;
+    @Test
+    void not_fetch_join(){
+        em.flush();
+        em.clear();
+        Member findMember = queryFactory.selectFrom(member)
+                .where(member.username.eq("member1"))
+                .join(member.team , team)
+                .fetchOne();
+        boolean isLoaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+        assertThat(isLoaded).as("non_fetch_join").isEqualTo(false);
+    }
+
+    @Test
+    void fetch_join(){
+        em.flush();
+        em.clear();
+        Member findMember = queryFactory.selectFrom(member)
+                .where(member.username.eq("member1"))
+                .join(member.team , team).fetchJoin()
+                .fetchOne();
+        boolean isLoaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
+        assertThat(isLoaded).as("fetch_join").isEqualTo(true);
     }
 }
