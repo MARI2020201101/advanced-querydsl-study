@@ -6,6 +6,7 @@ import com.mari.querydsl.entity.Team;
 import com.querydsl.core.QueryFactory;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.Assertions;
@@ -268,5 +269,59 @@ public class QuerysdslTest {
                 .fetchOne();
         boolean isLoaded = emf.getPersistenceUnitUtil().isLoaded(findMember.getTeam());
         assertThat(isLoaded).as("fetch_join").isEqualTo(true);
+    }
+
+    @Test
+    void sub_query(){
+        QMember subMember = new QMember("subMember");
+        List<Member> findMember = queryFactory
+                .selectFrom(member)
+                .where(
+                        member.age.eq(
+                                JPAExpressions
+                                        .select(subMember.age.max())
+                                        .from(subMember)))
+                .fetch();
+        assertThat(findMember.get(0).getAge()).isEqualTo(35);
+    }
+    @Test
+    void sub_query_goe(){
+        QMember subMember = new QMember("subMember");
+        List<Member> findMembers = queryFactory
+                .selectFrom(member)
+                .where(
+                        member.age.goe(
+                                JPAExpressions
+                                        .select(subMember.age.avg())
+                                        .from(subMember)))
+                .fetch();
+
+    }
+
+    @Test
+    void sub_query_in(){
+        QMember subMember = new QMember("subMember");
+        List<Member> findMembers = queryFactory
+                .selectFrom(member)
+                .where(member.age.in(
+                        JPAExpressions
+                                .select(subMember.age)
+                                .from(subMember)
+                .where(subMember.age.goe(30))))
+                .fetch();
+        assertThat(findMembers.size()).isEqualTo(2);
+        assertThat(findMembers).extracting("age").containsExactly(30,35);
+    }
+
+    @Test
+    void sub_query_select(){
+        QMember subMember = new QMember("subMember");
+        List<Tuple> findMembers =
+                queryFactory
+                .select(member.username,
+                        JPAExpressions.select(subMember.age.min()).from(subMember))
+                .from(member)
+                .fetch();
+        findMembers.forEach(System.out::println);
     }
 }
