@@ -161,6 +161,36 @@ public class QuerysdslTest {
         assertThat(tuple.get(member.age.avg())).isEqualTo(25);
 
     }
+    @Test
+    void join(){
+        List<Member> result = queryFactory.select(member)
+                .from(member)
+                .join(member.team , team)
+                .where(team.name.eq("team1"))
+                .fetch();
+
+        assertThat(result)
+                .extracting("username")
+                .containsExactly("member1","member2");
+    }
+
+    @Test
+    void theta_join(){
+        em.persist(new Member("team1"));
+        em.persist(new Member("team2"));
+        em.persist(new Member("team3"));
+
+        List<Member> result = queryFactory
+                .select(member)
+                .from(member,team)
+                .where(member.username.eq(team.name))
+                .fetch();
+
+        assertThat(result)
+                .extracting("username")
+                .containsExactly("team1","team2");
+    }
+
 
 
 }
