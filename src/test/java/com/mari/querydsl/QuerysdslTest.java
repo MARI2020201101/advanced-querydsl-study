@@ -5,6 +5,7 @@ import com.mari.querydsl.entity.QMember;
 import com.mari.querydsl.entity.Team;
 import com.querydsl.core.QueryFactory;
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.Assertions;
@@ -130,5 +131,21 @@ public class QuerysdslTest {
         assertThat(result.getLimit()).isEqualTo(2);
         assertThat(result.getOffset()).isEqualTo(1);
         result.getResults().stream().forEach(System.out::println);
+    }
+
+    @Test
+    void group(){
+        List<Tuple> result = queryFactory.select(
+                member.count()
+                ,member.age.max()
+                ,member.age.min())
+                .from(member)
+                .fetch();
+       // result.stream().forEach(System.out::println);
+        Tuple tuple = result.get(0);
+        assertThat(tuple.get(member.count())).isEqualTo(4);
+        assertThat(tuple.get(member.age.max())).isEqualTo(35);
+        assertThat(tuple.get(member.age.min())).isEqualTo(20);
+
     }
 }
