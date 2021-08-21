@@ -190,7 +190,56 @@ public class QuerysdslTest {
                 .extracting("username")
                 .containsExactly("team1","team2");
     }
+    @Test
+    void left_join(){
+        em.persist(new Member("member5",100,null));
+        em.persist(new Member("member6",100,null));
+        List<Tuple> result = queryFactory.select(member,team)
+                .from(member)
+                .leftJoin(member.team , team)
+               // .where(team.name.eq("team1"))
+                .fetch();
 
+        result.stream().forEach(System.out::println);
+    }
+    @Test
+    void left_join_on(){
+        em.persist(new Member("member5",100,null));
+        em.persist(new Member("member6",100,null));
+        List<Tuple> result = queryFactory.select(member,team)
+                .from(member)
+                .leftJoin(member.team , team)
+                .on(team.name.eq("team1"))
+                .fetch();
 
+        result.stream().forEach(System.out::println);
+    }
 
+    @Test
+    void join_where(){
+        em.persist(new Member("member5",100,null));
+        em.persist(new Member("member6",100,null));
+        List<Tuple> result = queryFactory.select(member,team)
+                .from(member)
+                .join(member.team , team)
+                .where(team.name.eq("team1"))
+                .fetch();
+
+        result.stream().forEach(System.out::println);
+        assertThat(result.size()).isEqualTo(2);
+    }
+
+    @Test
+    void join_where_on(){
+        em.persist(new Member("member5",100,null));
+        em.persist(new Member("member6",100,null));
+        List<Tuple> result = queryFactory.select(member,team)
+                .from(member)
+                .join(member.team , team)
+                .on(team.name.eq("team1"))
+                .fetch();
+
+        result.stream().forEach(System.out::println);
+        //assertThat(result.size()).isEqualTo(2);
+    }
 }
