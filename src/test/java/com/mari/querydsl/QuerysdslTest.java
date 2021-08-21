@@ -6,6 +6,8 @@ import com.mari.querydsl.entity.Team;
 import com.querydsl.core.QueryFactory;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.aspectj.lang.annotation.Before;
@@ -336,6 +338,22 @@ public class QuerysdslTest {
             ).from(member)
             .fetch();
         result.forEach(r-> System.out.println("member : "+ r));
+    }
 
+    @Test
+    void expressions(){
+        List<Tuple> result = queryFactory.select(member, Expressions.constant("A"))
+                .from(member)
+                .fetch();
+        result.forEach(r-> System.out.println("member : "+ r));
+    }
+
+    @Test
+    void concat(){
+        List<String> result = queryFactory
+                .select(member.username.concat("_").concat(member.age.stringValue()))
+                .from(member)
+                .fetch();
+        result.forEach(r-> System.out.println("member : "+ r));
     }
 }
