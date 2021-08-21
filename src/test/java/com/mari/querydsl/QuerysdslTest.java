@@ -4,6 +4,7 @@ import com.mari.querydsl.entity.Member;
 import com.mari.querydsl.entity.QMember;
 import com.mari.querydsl.entity.Team;
 import com.querydsl.core.QueryFactory;
+import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.Assertions;
@@ -16,15 +17,22 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.util.List;
 
+import static com.mari.querydsl.entity.QMember.member;
+
+import static com.mari.querydsl.entity.QTeam.team;
+
 @SpringBootTest
 @Transactional
 public class QuerysdslTest {
 
     @Autowired
     private EntityManager em;
+    JPAQueryFactory queryFactory = new JPAQueryFactory(em);
 
     @BeforeEach
     void insert(){
+        queryFactory = new JPAQueryFactory(em);
+
         Team team1 = new Team("team1");
         Team team2 = new Team("team2");
 
@@ -56,9 +64,6 @@ public class QuerysdslTest {
     }
     @Test
     void queryDsl(){
-        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
-        QMember member = QMember.member;
-
         Member result = queryFactory
                 .select(member)
                 .from(member)
@@ -68,4 +73,47 @@ public class QuerysdslTest {
         Assertions.assertEquals(result.getAge(),20);
     }
 
+    @Test
+    void search(){
+        Member result = queryFactory
+                .selectFrom(member)
+                .where(member.username.eq("member1"),
+                        member.age.eq(20))
+                .fetchOne();
+
+        Team result2 = queryFactory
+                .selectFrom(team)
+                .where(team.name.eq("team1"))
+                .fetchOne();
+
+        Assertions.assertEquals(result.getTeam().getName(),result2.getName());
+    }
+
+
+    @Test
+    void searchList(){
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .fetch();
+        Assertions.assertEquals(result.size(),4);
+
+        QueryResults<Member> result2 = queryFactory
+                .selectFrom(member)
+                .fetchResults();
+        Assertions.assertEquals(result2.getTotal(),4);
+    }
+
+    @Test
+    void sort(){
+        em.persist(new Member("member5",100,null));
+        em.persist(new Member("member6",100,null));
+        em.persist(new Member(null,40));
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .orderBy(member.username.desc().nullsLast(),member.age.desc())
+                .fetch();
+        result.stream().forEach(System.out::println);
+        Assertions.assertEquals(result.get(0).getAge(),100);
+
+    }
 }
