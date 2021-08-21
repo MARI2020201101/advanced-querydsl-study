@@ -356,4 +356,28 @@ public class QuerysdslTest {
                 .fetch();
         result.forEach(r-> System.out.println("member : "+ r));
     }
+
+
+    @Test
+    void select_as_tuple(){
+        List<Tuple> result = queryFactory
+                .select(member.username, member.id)
+                .from(member)
+                .fetch();
+        for (Tuple tuple : result){
+            System.out.println("member : " + tuple.get(member.username));
+            System.out.println("member : " + tuple.get(member.id));
+        }
+    }
+    @Test
+    void select_as_tuple2(){
+        List<Tuple> result = queryFactory
+                .select(member.username, member.id)
+                .from(member)
+                .fetch();
+        for (Tuple tuple : result){
+            System.out.println("member : " + tuple.get(0,String.class));
+            System.out.println("member : " + tuple.get(1,Long.class));
+        }
+    }
 }
