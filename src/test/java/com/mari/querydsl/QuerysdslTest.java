@@ -13,6 +13,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -461,7 +462,7 @@ public class QuerysdslTest {
         }
     }
 
-        private List<Member> selectWithUsernameAndAge(String username,int age){
+    private List<Member> selectWithUsernameAndAge(String username,int age){
             BooleanBuilder builder = new BooleanBuilder();
             if(StringUtils.isNotBlank(username)){
                 builder.and(member.username.eq(username));
@@ -473,7 +474,41 @@ public class QuerysdslTest {
                     .from(member)
                     .where(builder)
                     .fetch();
+    }
+
+    @Test
+    void condition_where(){
+        String username = "member2";
+        int age = 30;
+        List<Member> result = selectWithWithBooleanEx(username, age);
+        for (Member member1 : result) {
+            System.out.println(
+                    member1
+            );
         }
+    }
 
+    private List<Member> selectWithWithBooleanEx(String username, int age) {
+        return queryFactory.select(member)
+                .from(member)
+                .where(eqUsernameOrGoeAge(username,age))
+                .fetch();
+    }
 
+    private BooleanExpression isUserParam(String username){
+        if(StringUtils.isNotBlank(username)){
+            return member.username.eq(username);
+        }
+        else return null;
+    }
+    private BooleanExpression isAgeParam(int age){
+        if(age!=0){
+            return member.age.goe(age);
+        }
+        else return null;
+    }
+
+    private BooleanExpression eqUsernameOrGoeAge(String username, int age){
+        return isUserParam(username).or(isAgeParam(age));
+    }
 }
