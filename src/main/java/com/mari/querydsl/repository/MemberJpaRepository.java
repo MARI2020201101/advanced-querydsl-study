@@ -8,6 +8,8 @@ import com.mari.querydsl.entity.Member;
 import com.mari.querydsl.entity.QMember;
 import com.mari.querydsl.entity.QTeam;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -69,4 +71,41 @@ public class MemberJpaRepository {
               .where(builder)
               .fetch();
    }
+
+   public List<MemberApiDto> searchWithCondition(MemberSearchCondition condition){
+      return queryFactory
+              .select(new QMemberApiDto(
+                      member.id.as("memberId"),
+                      member.username,
+                      member.age,
+                      team.id.as("teamId"),
+                      team.name.as("teamname")
+              ))
+              .from(member)
+              .join(member.team, team)
+              .where(usernameEq(condition.getUsername()),
+                      teamnameEq(condition.getTeamname()),
+                      ageGoe(condition.getGoeAge()),
+                      ageLoe(condition.getLoeAge()))
+              .fetch();
+   }
+
+   private BooleanExpression ageLoe(Integer loeAge) {
+      return loeAge!=null? member.age.loe(loeAge):null;
+   }
+
+   private BooleanExpression ageGoe(Integer goeAge) {
+      return goeAge!=null? member.age.goe(goeAge):null;
+   }
+
+   private BooleanExpression teamnameEq(String teamname) {
+      return hasText(teamname)? team.name.eq(teamname):null;
+   }
+
+   private BooleanExpression usernameEq(String username) {
+      return hasText(username)? member.username.eq(username): null;
+   }
+
+
+
 }

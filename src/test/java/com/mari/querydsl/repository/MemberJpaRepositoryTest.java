@@ -1,9 +1,11 @@
 package com.mari.querydsl.repository;
 
+import com.mari.querydsl.dto.MemberApiDto;
 import com.mari.querydsl.dto.MemberSearchCondition;
 import com.mari.querydsl.entity.Member;
 import com.mari.querydsl.entity.Team;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -60,5 +65,15 @@ public class MemberJpaRepositoryTest {
 
         System.out.println(repository.selectMemberWithCond(condition));
 
+    }
+    @Test
+    void searchConditionTest(){
+        MemberSearchCondition condition = new MemberSearchCondition();
+        condition.setTeamname("team2");
+        condition.setGoeAge(30);
+        condition.setLoeAge(40);
+        List<MemberApiDto> result = repository.searchWithCondition(condition);
+        System.out.println(repository.searchWithCondition(condition));
+        assertThat(result.get(0).getUsername()).isEqualTo("member4");
     }
 }

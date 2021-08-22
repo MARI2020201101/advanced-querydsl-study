@@ -1,7 +1,6 @@
 package com.mari.querydsl.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,14 +11,14 @@ public class MemberApiDto {
     private String username;
     private int age;
     private Long teamId;
-    private String name;
+    private String teamname;
 
     @QueryProjection
-    public MemberApiDto(Long memberId, String username, int age, Long teamId, String name) {
+    public MemberApiDto(Long memberId, String username, int age, Long teamId, String teamname) {
         this.memberId = memberId;
         this.username = username;
         this.age = age;
         this.teamId = teamId;
-        this.name = name;
+        this.teamname = teamname;
     }
 }
