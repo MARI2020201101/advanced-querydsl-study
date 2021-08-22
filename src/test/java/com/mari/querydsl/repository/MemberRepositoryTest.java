@@ -33,4 +33,5 @@ class MemberRepositoryTest {
         assertThat(result.get(0).getUsername()).isEqualTo("member1");
 
     }
+
 }
