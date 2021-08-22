@@ -1,5 +1,7 @@
 package com.mari.querydsl;
 
+import com.mari.querydsl.dto.MemberDto;
+import com.mari.querydsl.dto.UserDto;
 import com.mari.querydsl.entity.Member;
 import com.mari.querydsl.entity.QMember;
 import com.mari.querydsl.entity.Team;
@@ -7,6 +9,8 @@ import com.querydsl.core.QueryFactory;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -378,6 +382,57 @@ public class QuerysdslTest {
         for (Tuple tuple : result){
             System.out.println("member : " + tuple.get(0,String.class));
             System.out.println("member : " + tuple.get(1,Long.class));
+        }
+    }
+
+    @Test
+    void projection_jpql(){
+        List<MemberDto> result = em.createQuery("select new com.mari.querydsl.dto.MemberDto(m.username, m.age) from Member m ")
+                .getResultList();
+        for (MemberDto memberDto : result) {
+            System.out.println(memberDto);
+        }
+    }
+
+    @Test
+    void projection_querydsl(){
+        List<MemberDto> result = queryFactory
+                .select(Projections.bean(MemberDto.class,
+                        member.username,
+                        member.age))
+                .from(member)
+                .fetch();
+        for (MemberDto memberDto : result) {
+            System.out.println(memberDto);
+        }
+    }
+    @Test
+    void projection_querydsl2(){
+        List<UserDto> result = queryFactory
+                .select(Projections.bean(UserDto.class,
+                        (member.username).as("name"),
+                        member.age))
+                .from(member)
+                .fetch();
+        for (UserDto memberDto : result) {
+            System.out.println(memberDto);
+        }
+    }
+
+    @Test
+    void projection_querydsl3(){
+        List<UserDto> result = queryFactory
+                .select(Projections.bean(UserDto.class,
+                        (member.username).as("name"),
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .select(member.age.avg().intValue())
+                                        .from(member), "age")
+                                ))
+                .from(member)
+                .fetch();
+        for (UserDto memberDto : result) {
+            System.out.println(memberDto);
         }
     }
 }
