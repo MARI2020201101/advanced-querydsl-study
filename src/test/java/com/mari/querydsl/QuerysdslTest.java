@@ -1,6 +1,7 @@
 package com.mari.querydsl;
 
 import com.mari.querydsl.dto.MemberDto;
+import com.mari.querydsl.dto.QMemberDto;
 import com.mari.querydsl.dto.UserDto;
 import com.mari.querydsl.entity.Member;
 import com.mari.querydsl.entity.QMember;
@@ -432,6 +433,16 @@ public class QuerysdslTest {
                 .from(member)
                 .fetch();
         for (UserDto memberDto : result) {
+            System.out.println(memberDto);
+        }
+    }
+    @Test
+    void query_projection(){
+        List<MemberDto> result = queryFactory
+                .select(new QMemberDto(member.username, member.age))
+                .from(member)
+                .fetch();
+        for (MemberDto memberDto : result) {
             System.out.println(memberDto);
         }
     }
