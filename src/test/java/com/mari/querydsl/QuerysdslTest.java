@@ -7,17 +7,14 @@ import com.mari.querydsl.entity.Member;
 import com.mari.querydsl.entity.QMember;
 import com.mari.querydsl.entity.Team;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.QueryFactory;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -531,5 +528,19 @@ public class QuerysdslTest {
         queryFactory.delete(member)
                 .where(member.age.lt(30))
                 .execute();
+    }
+
+    @Test
+    void sqlFunction(){
+        List<String> result = queryFactory
+                .select(Expressions.stringTemplate("function('replace',{0},{1},{2})",
+                        member.username,"member","MMMMM"))
+                .from(member)
+                .fetch();
+        for (String member1 : result) {
+            System.out.println(
+                    member1
+            );
+        }
     }
 }
