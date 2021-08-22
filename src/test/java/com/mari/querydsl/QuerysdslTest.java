@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -510,5 +511,25 @@ public class QuerysdslTest {
 
     private BooleanExpression eqUsernameOrGoeAge(String username, int age){
         return isUserParam(username).or(isAgeParam(age));
+    }
+
+    @Test
+    @Commit
+    void bulkUpdate(){
+        queryFactory.update(member)
+                .set(member.age,member.age.add(1))
+                .where(member.age.lt(30))
+                .execute();
+
+        em.flush();
+        em.clear();
+    }
+
+    @Test
+    @Commit
+    void bulkDelete(){
+        queryFactory.delete(member)
+                .where(member.age.lt(30))
+                .execute();
     }
 }
