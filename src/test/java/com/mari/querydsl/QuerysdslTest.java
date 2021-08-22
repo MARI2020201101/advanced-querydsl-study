@@ -6,6 +6,7 @@ import com.mari.querydsl.dto.UserDto;
 import com.mari.querydsl.entity.Member;
 import com.mari.querydsl.entity.QMember;
 import com.mari.querydsl.entity.Team;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryFactory;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
@@ -19,6 +20,7 @@ import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -446,4 +448,32 @@ public class QuerysdslTest {
             System.out.println(memberDto);
         }
     }
+
+    @Test
+    void boolean_builder() {
+        String username = "member2";
+        int age = 30;
+        List<Member> result = selectWithUsernameAndAge(username, age);
+        for (Member member1 : result) {
+            System.out.println(
+                    member1
+            );
+        }
+    }
+
+        private List<Member> selectWithUsernameAndAge(String username,int age){
+            BooleanBuilder builder = new BooleanBuilder();
+            if(StringUtils.isNotBlank(username)){
+                builder.and(member.username.eq(username));
+            }
+            if(age!=0){
+                builder.or(member.age.goe(age));
+            }
+           return queryFactory.select(member)
+                    .from(member)
+                    .where(builder)
+                    .fetch();
+        }
+
+
 }
