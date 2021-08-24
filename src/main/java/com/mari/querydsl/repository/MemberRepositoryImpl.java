@@ -3,13 +3,16 @@ package com.mari.querydsl.repository;
 import com.mari.querydsl.dto.MemberApiDto;
 import com.mari.querydsl.dto.MemberSearchCondition;
 import com.mari.querydsl.dto.QMemberApiDto;
+import com.mari.querydsl.entity.Member;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
 
@@ -84,14 +87,16 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        long total = queryFactory
+        JPAQuery<Member> total = queryFactory
                 .selectFrom(member)
                 .where(usernameEq(condition.getUsername()),
                 teamnameEq(condition.getTeamname()),
                 ageGoe(condition.getGoeAge()),
-                ageLoe(condition.getLoeAge()))
-                .fetchCount();
-        return new PageImpl<>(result , pageable, total);
+                ageLoe(condition.getLoeAge()));
+
+      // return PageableExecutionUtils.getPage(result, pageable, ()-> total.fetchCount());
+        return PageableExecutionUtils.getPage(result, pageable, total::fetchCount);
+        //return new PageImpl<>(result , pageable, total);
     }
 
     private BooleanExpression ageLoe(Integer loeAge) {
